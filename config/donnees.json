@@ -1,0 +1,15 @@
+{
+    "email_user": "jean.bon@gmail.com",
+    "password_user": "Validation68!",
+    "name_user": "Bon",
+    "firstname_user": "Jean",
+    "picture_user": "www://Images",
+
+    
+    "email": "jean.bon@gmail.com",
+    "password": "Validation68!",
+
+    "titre" : "Oeuvre d'art",
+    "texte": "On peut y voir de la peur !",
+    "image": "www/image.com"
+}

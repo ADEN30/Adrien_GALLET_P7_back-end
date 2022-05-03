@@ -1,0 +1,6 @@
+config/.env
+config/donnees
+node_modules
+
+/images
+
