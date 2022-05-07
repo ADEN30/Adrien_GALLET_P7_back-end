@@ -5,10 +5,10 @@ require('dotenv').config({path: './config/.env'});
 
 app.set('port', process.env.PORT);
 const server = http.createServer(app);
-const io = require("socket.io")(server, {cors: {
+/* const io = require("socket.io")(server, {cors: {
     origin: "*"}
   });
-/* io.on("connect", (socket)=>{
+io.on("connect", (socket)=>{
     console.log("vous êtes connecté");
 }); */
 

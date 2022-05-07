@@ -3,13 +3,15 @@ const con = require('../config/connect');
 const fs = require('fs');
 
 exports.getAllposts = (req,res, next) =>{
-    let all_posts_comments = `SELECT nbLike_post, nbDislike_post, date_post, date_user_post_comment, userid_post, picture_user,id_post, titre_post, text_post, picture_post, texte_user_post_comment, picture_user, name_user, firstname_user FROM posts JOIN users_posts_comments ON id_post = postId_user_post_comment JOIN users ON userId_user_post_comment = id_user AND id_user = userid_post ORDER BY date_post DESC`;
+    let all_posts_comments = `SELECT postId_user_post_comment, nbLike_post, nbDislike_post, date_post, date_user_post_comment, userid_post, picture_user,id_post, titre_post, text_post, picture_post, texte_user_post_comment, picture_user, name_user, firstname_user FROM posts JOIN users_posts_comments ON id_post = postId_user_post_comment JOIN users ON userId_user_post_comment = id_user AND id_user = userid_post ORDER BY date_post DESC`;
     con.query(all_posts_comments, (err, posts_comments, fields)=>{
         if(err)throw err;
-        for(let i = 0; i< posts_comments.length; i++){
+        con.query(`SELECT * FROM posts WHERE comment_post = true`, (err, all_posts_comment)=>{
+        console.log(posts_comments.length);
+        for(let i = 0; i< all_posts_comment.length; i++){
             let comment = [];
             for(let y = 0; y < posts_comments.length ; y++){
-                if(posts_comments[i].id_post == posts_comments[y].id_post){
+                if(all_posts_comment[i].id_post == posts_comments[y].postId_user_post_comment){
                     let user_comment = {
                         comment : posts_comments[y].texte_user_post_comment,
                         name : posts_comments[y].name_user,
@@ -18,33 +20,30 @@ exports.getAllposts = (req,res, next) =>{
                         date: posts_comments[y].date_user_post_comment
                     };
                     comment.push(user_comment);
-                    delete posts_comments[i].texte_user_post_comment;
-                    delete posts_comments[i].date_user_post_comment;
-                    delete posts_comments[y].picture_user;
-                    delete posts_comments[y].name_user;
-                    delete posts_comments[y].firstname_user;
-                    if(y != i){
-                        posts_comments.splice(y);
-                    };
                 };
                 
             }
-            let user_build = {};
-            con.query(`SELECT name_user, firstname_user, picture_user FROM users WHERE id_user = ${posts_comments[i].userid_post}`, (err, userBuild, fields)=>{
-            user_build = {
+            con.query(`SELECT name_user, firstname_user, picture_user FROM users WHERE id_user = ${all_posts_comment[i].userid_post}`, (err, userBuild, fields)=>{
+            let user_build = {
                 ...userBuild[0]
             };
-            posts_comments[i] = {
-                ...posts_comments[i],
+            all_posts_comment.push({
+                ...all_posts_comment[i],
                 user_build,
                 comment
-            }
             })
-            
+            console.log(all_posts_comment)
+            })
         }
+        
         let posts_no_comment = `SELECT nbLike_post, nbDislike_post, date_post, id_post, titre_post, text_post, picture_post, picture_user, name_user, firstname_user FROM posts  JOIN users ON userid_post = id_user WHERE comment_post = false ORDER BY date_post DESC `;
         con.query(posts_no_comment, (err, post_no_comment , fields)=>{
-            res.status(200).json({posts_comments, post_no_comment });
+            let publication_commenter = [];
+        for(let i = all_posts_comment.length/2 ; i < all_posts_comment.length; i++){
+            publication_commenter.push(all_posts_comment[i])
+        }
+            res.status(200).json({publication_commenter, post_no_comment });
+        });
         });
         
     });
@@ -209,6 +208,9 @@ exports.create_comment = (req, res)=>{
                     if(err) throw err;
                     res.status(201).json({message: "commentaire créé"});
                 });
+            }
+            else if(resu[0].comment_post == true){
+                res.status(201).json({message: "commentaire créé"});
             }
             else{
                 res.status(400).json({message: "commentaire non créé"});

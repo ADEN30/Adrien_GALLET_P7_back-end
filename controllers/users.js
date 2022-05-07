@@ -2,6 +2,7 @@ const con = require('../config/connect');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require("fs");
+const crypto = require('crypto');
 
 
 exports.singup = (req, res, next) =>{
@@ -39,11 +40,18 @@ exports.login = (req,res,next) =>{
                     if(!rep)
                         res.status(500).json({message: "Code is false"});
                     else{
-                        res.status(200).json({
+                        const xsrfToken = crypto.randomBytes(64).toString('hex');
+                        let token = jwt.sign({userId:result[0].id_user, xsrfToken}, "RANDOM_SECRET_TOKEN", {expiresIn: "24h"});
+                        res.status(200)
+                        .cookie("token",JSON.stringify(token), {
+                            httpOnly: true,
+                            expires: new Date(Date.now() + 60*60*1000)
+                        })
+                        .json({
                             message: "Connecté",
                             userId: result[0].id_user,
                             droit: result[0].droit_user,
-                            token: jwt.sign({userId:result[0].id_user}, "RANDOM_SECRET_TOKEN", {expiresIn: "24h"})
+                            xsrfToken
                         });
                     }
                 })
