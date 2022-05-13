@@ -6,7 +6,7 @@ module.exports =  (req, res, next) =>{
         const decoded = jwt.verify(token,"RANDOM_SECRET_TOKEN");
         const userId = decoded.userId;
         const xsrfToken = req.headers['x-xsrf-token'];
-        req.auth = ({userId});
+        req.auth = ({userId, token});
 
         if(!xsrfToken && xsrfToken != decoded.xsrfToken){
 

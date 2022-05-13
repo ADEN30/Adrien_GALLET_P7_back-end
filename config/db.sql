@@ -15,8 +15,8 @@ CREATE TABLE users(
 CREATE TABLE posts(
     id_post INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     userid_post INTEGER NOT NULL,
-    titre_post VARCHAR(250) DEFAULT "" NOT NULL,
-    text_post VARCHAR(200) DEFAULT "" NOT NULL,
+    titre_post VARCHAR(250) DEFAULT " " NOT NULL,
+    text_post VARCHAR(200) DEFAULT " " NOT NULL,
     picture_post VARCHAR(1000),
     nbLike_post INTEGER DEFAULT 0,
     nbDislike_post INTEGER DEFAULT 0,

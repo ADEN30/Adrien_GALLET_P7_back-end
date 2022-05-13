@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/singup', multer, ctrl.singup);
 router.post('/login', ctrl.login);
 router.get('/user/profil', auth, ctrl.getUserProfile);
-router.put('/user/profil', auth, ctrl.modifyUserProfile);
+router.put('/user/profil', auth, multer, ctrl.modifyUserProfile);
 router.delete('/user/profil', auth, ctrl.deleteUser);
 
 module.exports = router;

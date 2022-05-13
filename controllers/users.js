@@ -17,7 +17,7 @@ exports.singup = (req, res, next) =>{
             con.query(`SELECT * FROM posts`, (err, posts, field)=>{
                 con.query(`SELECT * FROM users WHERE email_user = "${data.email}"`, (err, user, fiel)=>{
                     for(let i = 0; i < posts.length; i++){
-                        con.query(`INSERT INTO users_posts_likes (user_id, post_id, like_id) VALUES (${user[0].id_user}, ${posts[i].id_post}, 0) `, (err, like, fiel)=>{
+                        con.query(`INSERT INTO users_posts_likes (user_id, post_id, like_id) VALUES (${user[0].id_user}, ${posts[i].id_post}, 1) `, (err, like, fiel)=>{
                         })
                     }
                 })
@@ -76,23 +76,32 @@ exports.getUserProfile = (req, res, next) =>{
 };
 
 exports.getUser = (req, res, next) => {
-    con.query(`SELECT name_user, firstname_user, picture_user FROM users WHERE name_user = %${req.body.recherche}%`, (err, result, fields)=>{
+    con.query(`SELECT email_user, name_user, firstname_user, picture_user FROM users WHERE name_user = %${req.body.recherche}%`, (err, result, fields)=>{
         if(err) throw err;
         res.status(200).json(result);
     });
 };
 exports.modifyUserProfile = (req, res, next) =>{
     con.query(`SELECT * FROM users WHERE id_user = ${req.auth.userId}`, (err, result)=>{
+        console.log(req.file);
         if(req.file){
-        let objet = JSON.parse(req.body);
-        con.query(`UPDATE users SET email_user = REPLACE(email_user, "${result[0].email_user}" , "${objet.email}"), name_user = REPLACE(name_user, "${result[0].name_user}", "${objet.name}", firstname_user = REPLACE(firstname_user, "${result[0].firstname_user}", "${objet.firstname}"), picture_user = REPLACE("${result[0].picture_post}","${req.protocol}://${req.get('host')}/${req.file.path}") WHERE id_user = ${result[0].id_user} )`, (err, resul)=>{
+        let objet = JSON.parse(req.body.client);
+        console.log(objet);
+        con.query(`UPDATE users SET email_user = REPLACE(email_user, "${result[0].email_user}" , "${objet.email}"), name_user = REPLACE(name_user, "${result[0].name_user}", "${objet.name}"), firstname_user = REPLACE(firstname_user, "${result[0].firstname_user}", "${objet.firstname}"), picture_user = REPLACE(picture_user, "${result[0].picture_user}","${req.protocol}://${req.get('host')}/${req.file.path}") WHERE id_user = ${req.auth.userId} `, (err, resul)=>{
+            con.query(`SELECT * FROM users WHERE id_user = ${req.auth.userId}`, (err, user_update)=>{
+                res.status(200).json({ name: user_update[0].name_user, firstname: user_update[0].firstname_user, email: user_update[0].email_user, picture: user_update[0].picture_user, message: "Modification(s) efféctuée(s)"});
+            });
         });
         fs.unlink(result[0].picture_user, ()=> console.log("image supprimée"));
+        
     }
     else{
         con.query(`UPDATE users SET email_user = REPLACE(email_user, "${result[0].email_user}", "${req.body.email}"), name_user = REPLACE(name_user, "${result[0].name}","${req.body.name}"), firstname_user = REPLACE(firstname_user, "${result[0].firstname}", "${req.body.firstname}") WHERE id_user = ${result[0].id_user}`, (err, resu, fields)=>{
             if(err) throw err;
-            res.status(200).json({message: "Modification(s) efféctuée(s)"});
+            con.query(`SELECT * FROM users WHERE id_user = ${req.auth.userId}`, (err, user_update)=>{
+                res.status(200).json({ name: user_update[0].name_user, firstname: user_update[0].firstname_user, email: user_update[0].email_user, picture: user_update[0].picture_user, message: "Modification(s) efféctuée(s)"});
+            });
+            
         });
     }
     
