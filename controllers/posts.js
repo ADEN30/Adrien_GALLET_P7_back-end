@@ -147,28 +147,36 @@ exports.modifyPosts = (req, res, next) => {
         if (err) throw err;
         if (this_post[0].userid_post && this_post[0].userid_post == req.auth.userId || req.auth.userId == 1) {
             let modif;
-            if (req.file) {
+            if(req.file) {
                 let objet = JSON.parse(req.body.post);
                 modif = `UPDATE posts SET titre_post= REPLACE(titre_post,"${this_post[0].titre_post}", "${objet.titre}") , text_post= REPLACE(text_post, "${this_post[0].text_post}", "${objet.texte}"), picture_post = REPLACE(picture_post,"${this_post[0].picture_post}","${req.protocol}://${req.get('host')}/${req.file.path}")  WHERE id_post = ${this_post[0].id_post}`;
                 fs.unlink(this_post[0].picture_post, () => console.log("image supprimée"));
-                con.query(modif, (err, result, feilds) => {
+                con.query(`UPDATE posts SET titre_post = "${objet.titre}" , text_post = "${objet.texte}", picture_post = "${req.protocol}://${req.get('host')}/${req.file.path}"  WHERE id_post = ${this_post[0].id_post}`, (err, result, feilds) => {
                     if (err) throw err;
                     res.status(200).json({ message: "post modifié", picture: `${req.protocol}://${req.get('host')}/${req.file.path}` });
                 });
             }
             else {
-
-                modif = `UPDATE posts SET titre_post = REPLACE(titre_post, "${this_post[0].titre_post}","${req.body.titre}"), text_post = REPLACE(text_post, "${this_post[0].text_post}","${req.body.texte}") WHERE id_post = ${this_post[0].id_post}`;
-                con.query(modif, (err, result, feilds) => {
+                console.log(req.body);
+                modif = `UPDATE posts SET titre_post = REPLACE(titre_post, "${this_post[0].titre_post}","${req.body.titre}"), text_post = REPLACE(text_post, "${this_post[0].text_post}","${req.body.texte}") WHERE id_post = ${req.params.id}`;
+                con.query(`UPDATE posts SET titre_post = "${req.body.titre}", text_post = "${req.body.texte}" WHERE id_post = ${req.params.id}`, (err, result, feilds) => {
                     if (err) throw err;
-                    res.status(200).json({ message: "post modifié" });
+                    console.log(result)
+                    con.query(`SELECT * FROM posts WHERE id_post = ${req.params.id}`, (err, new_post)=>{
+                        console.log(new_post)
+                        res.status(200).json({ message: "post modifié", titre: new_post[0].titre_post, texte: new_post[0].text_post, picture: new_post[0].picture_post });
+                    });
+                    
                 });
+                
             }
+            
 
         }
         else {
             res.status(401).json({ message: "non authorisé" })
         };
+        
     });
 
 };
@@ -181,7 +189,7 @@ exports.deletePosts = (req, res, next) => {
             post_id = req.params.id;
         }
         else {
-            post_id = req.body.post
+            post_id = req.body.post;
         }
         console.log(post_id);
         let post = `SELECT * FROM posts  WHERE id_post = ${post_id}`;
