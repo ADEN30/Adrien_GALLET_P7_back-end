@@ -4,6 +4,9 @@
 ```
 npm install
 ```
+### Installer la BDD
+Copié et collé le ficher db.sql dans votre SGBD mysql
+
 ### Configurer un .env
 ```
 PORT = 5000
