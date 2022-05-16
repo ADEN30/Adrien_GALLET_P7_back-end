@@ -5,6 +5,7 @@ const fs = require("fs");
 const crypto = require('crypto');
 
 
+
 exports.singup = (req, res, next) =>{
     console.log(req.body);
     const data = JSON.parse(req.body.client);
