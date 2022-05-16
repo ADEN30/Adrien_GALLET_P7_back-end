@@ -1,5 +1,5 @@
 config/.env
-/config/donnees.json
+config/*.json
 node_modules
 
 /images
