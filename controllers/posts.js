@@ -149,9 +149,8 @@ exports.modifyPosts = (req, res, next) => {
             let modif;
             if(req.file) {
                 let objet = JSON.parse(req.body.post);
-                modif = `UPDATE posts SET titre_post= REPLACE(titre_post,"${this_post[0].titre_post}", "${objet.titre}") , text_post= REPLACE(text_post, "${this_post[0].text_post}", "${objet.texte}"), picture_post = REPLACE(picture_post,"${this_post[0].picture_post}","${req.protocol}://${req.get('host')}/${req.file.destination}/${req.file.filename}")  WHERE id_post = ${this_post[0].id_post}`;
                 fs.unlink(this_post[0].picture_post, () => console.log("image supprimée"));
-                con.query(`UPDATE posts SET titre_post = "${objet.titre}" , text_post = "${objet.texte}", picture_post = "${req.protocol}://${req.get('host')}/${req.file.path}"  WHERE id_post = ${this_post[0].id_post}`, (err, result, feilds) => {
+                con.query(`UPDATE posts SET titre_post = "${objet.titre}" , text_post = "${objet.texte}", picture_post = "${req.protocol}://${req.get('host')}/${req.file.destination}/${req.file.filename}"  WHERE id_post = ${this_post[0].id_post}`, (err, result, feilds) => {
                     if (err) throw err;
                     res.status(200).json({ message: "post modifié", picture: `${req.protocol}://${req.get('host')}/${req.file.destination}/${req.file.filename}` });
                 });
