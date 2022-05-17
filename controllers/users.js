@@ -9,9 +9,10 @@ const crypto = require('crypto');
 exports.singup = (req, res, next) =>{
     console.log(req.body);
     const data = JSON.parse(req.body.client);
+    console.log(req.file);
     bcrypt.hash(data.password,10)
         .then((hash)=>{
-            con.query(`INSERT INTO users (email_user, password_user, name_user, firstname_user, picture_user) VALUES ("${data.email}","${hash}","${data.name}","${data.firstname}", "${req.protocol}://${req.get('host')}/${req.file.path}")`,(err, result, fields) =>{
+            con.query(`INSERT INTO users (email_user, password_user, name_user, firstname_user, picture_user) VALUES ("${data.email}","${hash}","${data.name}","${data.firstname}", "${req.protocol}://${req.get('host')}/${req.file.destination}/${req.file.filename}")`,(err, result, fields) =>{
                 if(err) throw err;
                 res.status(201).json({message: "Compte créé"});
             });
@@ -33,6 +34,7 @@ exports.login = (req,res,next) =>{
         if(err) {
             throw err;
         }
+        console.log(result)
         if(result.length >0){
             if(req.body.email && result[0].email_user){
             
@@ -86,7 +88,7 @@ exports.modifyUserProfile = (req, res, next) =>{
     con.query(`SELECT * FROM users WHERE id_user = ${req.auth.userId}`, (err, result)=>{
         if(req.file){
         let objet = JSON.parse(req.body.client);
-        con.query(`UPDATE users SET email_user = "${objet.email}", name_user = "${objet.name}", firstname_user = "${objet.firstname}", picture_user = "${req.protocol}://${req.get('host')}/${req.file.path}" WHERE id_user = ${req.auth.userId} `, (err, resul)=>{
+        con.query(`UPDATE users SET email_user = "${objet.email}", name_user = "${objet.name}", firstname_user = "${objet.firstname}", picture_user = "${req.protocol}://${req.get('host')}/${req.file.destination}/${req.file.filename}" WHERE id_user = ${req.auth.userId} `, (err, resul)=>{
             con.query(`SELECT * FROM users WHERE id_user = ${req.auth.userId}`, (err, user_update)=>{
                 res.status(200).json({ name: user_update[0].name_user, firstname: user_update[0].firstname_user, email: user_update[0].email_user, picture: user_update[0].picture_user, message: "Modification(s) efféctuée(s)"});
             });

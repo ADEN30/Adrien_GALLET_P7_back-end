@@ -122,7 +122,7 @@ exports.getOnepost = (req, res, next) => {
 
 exports.createPost = (req, res, next) => {
     const objet = JSON.parse(req.body.post);
-    const post = `INSERT INTO posts (userid_post, titre_post, text_post, picture_post, date_post) VALUES (${req.auth.userId}, "${objet.titre}", "${objet.texte}", "${req.protocol}://${req.get('host')}/${req.file.path}", NOW())`;
+    const post = `INSERT INTO posts (userid_post, titre_post, text_post, picture_post, date_post) VALUES (${req.auth.userId}, "${objet.titre}", "${objet.texte}", "${req.protocol}://${req.get('host')}/${req.file.destination}/${req.file.filename}", NOW())`;
     con.query(post, (err, result, fields) => {
         if (err) throw err;
         res.status(201).json({ message: "post créé" });
@@ -149,11 +149,11 @@ exports.modifyPosts = (req, res, next) => {
             let modif;
             if(req.file) {
                 let objet = JSON.parse(req.body.post);
-                modif = `UPDATE posts SET titre_post= REPLACE(titre_post,"${this_post[0].titre_post}", "${objet.titre}") , text_post= REPLACE(text_post, "${this_post[0].text_post}", "${objet.texte}"), picture_post = REPLACE(picture_post,"${this_post[0].picture_post}","${req.protocol}://${req.get('host')}/${req.file.path}")  WHERE id_post = ${this_post[0].id_post}`;
+                modif = `UPDATE posts SET titre_post= REPLACE(titre_post,"${this_post[0].titre_post}", "${objet.titre}") , text_post= REPLACE(text_post, "${this_post[0].text_post}", "${objet.texte}"), picture_post = REPLACE(picture_post,"${this_post[0].picture_post}","${req.protocol}://${req.get('host')}/${req.file.destination}/${req.file.filename}")  WHERE id_post = ${this_post[0].id_post}`;
                 fs.unlink(this_post[0].picture_post, () => console.log("image supprimée"));
                 con.query(`UPDATE posts SET titre_post = "${objet.titre}" , text_post = "${objet.texte}", picture_post = "${req.protocol}://${req.get('host')}/${req.file.path}"  WHERE id_post = ${this_post[0].id_post}`, (err, result, feilds) => {
                     if (err) throw err;
-                    res.status(200).json({ message: "post modifié", picture: `${req.protocol}://${req.get('host')}/${req.file.path}` });
+                    res.status(200).json({ message: "post modifié", picture: `${req.protocol}://${req.get('host')}/${req.file.destination}/${req.file.filename}` });
                 });
             }
             else {
@@ -195,8 +195,8 @@ exports.deletePosts = (req, res, next) => {
         let post = `SELECT * FROM posts  WHERE id_post = ${post_id}`;
         con.query(post, (err, this_post, fields) => {
             if (err) throw err;
-            console.log(this_post);
             if (this_post[0].userid_post && this_post[0].userid_post == req.auth.userId || user[0].droit_user == 1) {
+                fs.unlink(this_post[0].picture_post, () => console.log("image supprimée"));
                 let delpost = `DELETE FROM posts WHERE id_post = ${post_id}`;
                 con.query(delpost, (err, resul, field) => {
                     if (err) throw err;
