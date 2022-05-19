@@ -70,7 +70,7 @@ exports.login = (req,res,next) =>{
 };
 
 exports.getUserProfile = (req, res, next) =>{
-    con.query(`SELECT email_user, name_user, firstname_user, picture_user FROM users WHERE id_user = ${req.auth.userId}`, (err, result, fields)=>{
+    con.query(`SELECT email_user, name_user, firstname_user, picture_user, droit_user FROM users WHERE id_user = ${req.auth.userId}`, (err, result, fields)=>{
         if(err) {
             throw err;  
         }
@@ -119,7 +119,9 @@ exports.deleteUser = (req, res)=>{
             con.query(user_post, (err, post, fiel)=>{
                 if(err) throw err;
                 if(post.length > 0){
-                    fs.unlink(post[0].picture_post, ()=> console.log("image supprimée"));
+                    for(let i =0; i<post.length; i++){
+                        fs.unlink(post[i].picture_post, ()=> console.log("image supprimée"));
+                    }
                 };
                 
             });
@@ -137,21 +139,20 @@ exports.deleteUser = (req, res)=>{
             
         }
         else{
-            let user_post = `SELECT * FROM users JOIN posts ON id_user = userid_post WHERE id_user = ${req.body.user}`;
-            con.query(user_post, (err, resul, fiel)=>{
+            let user_post = `SELECT * FROM users JOIN posts ON id_user = userid_post WHERE email_user = "${req.body.user}"`;
+            con.query(user_post, (err, post, fiel)=>{
                 if(err) throw err;
                 if(post.length > 0){
-                    fs.unlink(resul[0].picture_post, ()=> console.log("image supprimée"));
+                    for(let i = 0; i<post.length; i++){
+                        fs.unlink(post[i].picture_post, ()=> console.log("image supprimée"));
+                    }
                 };
             })
             fs.unlink(result[0].picture_user, ()=> console.log("image supprimée"));
-            let delete_user = `DELETE FROM users WHERE id_user = ${req.body.user}`;
+            let delete_user = `DELETE FROM users WHERE email_user = "${req.body.user}"`;
             con.query(delete_user, (err, result, fields)=>{
                 if(err) throw err;
-                if(!result[0]){
-                    res.status(400).json({message: "utilisateur non supprimé"});
-                }
-                else{
+                if(result[0]){
                     res.status(200).json({message: "utilisateur supprimé"});
                 };
             });
