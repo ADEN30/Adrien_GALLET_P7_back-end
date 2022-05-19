@@ -3,7 +3,7 @@ const con = require('../config/connect');
 const fs = require('fs');
 
 exports.getAllposts = (req, res, next) => {
-    let all_posts_comments = `SELECT id_user_post_comment, postId_user_post_comment, nbLike_post, nbDislike_post, date_post, date_user_post_comment, userid_post, picture_user,id_post, titre_post, text_post, picture_post, texte_user_post_comment, picture_user, name_user, firstname_user FROM posts JOIN users_posts_comments ON id_post = postId_user_post_comment JOIN users ON userId_user_post_comment = id_user AND id_user = userid_post ORDER BY date_post DESC`;
+    let all_posts_comments = `SELECT * FROM posts JOIN users_posts_comments ON id_post = postId_user_post_comment JOIN users ON userId_user_post_comment = id_user ORDER BY date_post DESC`;
     con.query(all_posts_comments, (err, posts_comments, fields) => {
         if (err) throw err;
         con.query(`SELECT * FROM posts WHERE comment_post = true`, (err, all_posts_comment) => {
@@ -12,7 +12,7 @@ exports.getAllposts = (req, res, next) => {
                 for (let y = 0; y < posts_comments.length; y++) {
                     if (all_posts_comment[i].id_post == posts_comments[y].postId_user_post_comment) {
                         let user_comment = {
-                            id_comment: posts_comments[i].id_user_post_comment,
+                            id_comment: posts_comments[y].id_user_post_comment,
                             comment: posts_comments[y].texte_user_post_comment,
                             name: posts_comments[y].name_user,
                             firstname: posts_comments[y].firstname_user,
@@ -85,7 +85,7 @@ exports.getOnepost = (req, res, next) => {
                             comment.push(user_comment);
                         });
                     }
-                    con.query(`SELECT name_user, firstname_user, picture_user FROM users WHERE id_user = ${onepost[0].userid_post}`, (err, userBuild, fields) => {
+                    con.query(`SELECT name_user, firstname_user, picture_user, droit_user FROM users WHERE id_user = ${onepost[0].userid_post}`, (err, userBuild, fields) => {
                         let user_build = {
                             ...userBuild[0]
                         };
@@ -94,12 +94,14 @@ exports.getOnepost = (req, res, next) => {
                             comment,
                             user_build
                         }
-                        res.status(200).json({ publication_commenter: [onepost], post_no_comment: [], userId: req.auth.userId });
+                        con.query(`SELECT * FROM users WHERE id_user = ${req.auth.userId}`, (err, user) => {
+                            res.status(200).json({ publication_commenter: [onepost], post_no_comment: [], userId: req.auth.userId, droit: user[0].droit_user });
+                        });
                     });
                 });
             }
             else {
-                con.query(`SELECT name_user, firstname_user, picture_user FROM users WHERE id_user = ${onepost[0].userid_post}`, (err, userBuild, fields) => {
+                con.query(`SELECT name_user, firstname_user, picture_user, droit_user FROM users WHERE id_user = ${onepost[0].userid_post}`, (err, userBuild, fields) => {
                     let user_build = {
                         ...userBuild[0]
                     };
@@ -108,7 +110,9 @@ exports.getOnepost = (req, res, next) => {
                         user_build,
                         comment: []
                     }
-                    res.status(200).json({ publication_commenter: [], post_no_comment: [onepost], userId: req.auth.userId });
+                    con.query(`SELECT * FROM users WHERE id_user = ${req.auth.userId}`, (err, user) => {
+                        res.status(200).json({ publication_commenter: [], post_no_comment: [onepost], userId: req.auth.userId, droit: user[0].droit_user });
+                    });
                 });
 
             }
@@ -293,18 +297,22 @@ exports.create_comment = (req, res) => {
             if (err) throw err;
             con.query(`SELECT * FROM posts WHERE id_post = ${req.body.post}`, (err, resu, champs) => {
                 if (err) throw err;
-                if (resu[0].comment_post == false) {
+                con.query(`SELECT * FROM users_posts_comments ORDER BY id_user_post_comment DESC`, (err, commentaires)=>{
+                    if(err) throw err;
+                    if (resu[0].comment_post == false) {
                     con.query(`UPDATE posts SET comment_post = true WHERE id_post = ${req.body.post}`, (err, result, field) => {
                         if (err) throw err;
-                        res.status(201).json( {name: user[0].name_user, firstname: user[0].firstname_user, picture: user[0].picture_user});
+                        res.status(201).json( {name: user[0].name_user, firstname: user[0].firstname_user, picture: user[0].picture_user, id_comment: commentaires[0].id_user_post_comment});
                     });
-                }
-                else if (resu[0].comment_post == true) {
-                    res.status(201).json({ name: user[0].name_user, firstname: user[0].firstname_user, picture: user[0].picture_user });
-                }
-                else {
-                    res.status(400).json({ message: "commentaire non créé" });
-                }
+                    }
+                    else if (resu[0].comment_post == true) {
+                        res.status(201).json({ name: user[0].name_user, firstname: user[0].firstname_user, picture: user[0].picture_user, id_comment: commentaires[0].id_user_post_comment});
+                    }
+                    else {
+                        res.status(400).json({ message: "commentaire non créé" });
+                    }
+                })
+                
 
             });
         })
@@ -313,13 +321,19 @@ exports.create_comment = (req, res) => {
 };
 
 exports.delete_comment = (req, res) => {
+    
     con.query(`SELECT * FROM users WHERE id_user = ${req.auth.userId}`, (err, user, fields) => {
         if (err) throw err;
-
+        console.log(req.auth.userId)
         let comment = `SELECT * FROM users_posts_comments  WHERE id_user_post_comment = ${req.body.id_comment}`;
         con.query(comment, (err, this_comment, fields) => {
-            console.log(this_comment);
             if (err) throw err;
+            console.log(this_comment);
+            if(this_comment.length == 1){
+                con.query(`UPDATE posts SET comment_post = false WHERE id_post = ${req.body.post}`, (err, result)=>{
+                    console.log('Update post_comment')
+                })
+            };    
 
             if (this_comment[0].id_user_post_comment && this_comment[0].userId_user_post_comment == req.auth.userId || user[0].droit_user == 1) {
                 let delcomment = `DELETE FROM users_posts_comments WHERE id_user_post_comment = ${this_comment[0].id_user_post_comment}`;
@@ -332,6 +346,8 @@ exports.delete_comment = (req, res) => {
                 console.log("pas authorisé")
                 res.status(401).json({ message: "non authorisé" })
             };
+            
+            
         });
     });
 }
