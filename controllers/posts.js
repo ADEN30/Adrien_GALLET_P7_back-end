@@ -311,7 +311,7 @@ exports.create_comment = (req, res) => {
                     else {
                         res.status(400).json({ message: "commentaire non créé" });
                     }
-                })
+                });
                 
 
             });

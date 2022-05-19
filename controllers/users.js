@@ -129,6 +129,7 @@ exports.deleteUser = (req, res)=>{
             let delete_user = `DELETE FROM users WHERE id_user = ${req.auth.userId}`;
             con.query(delete_user, (err, resul, fields)=>{
                 if(err) throw err;
+                console.log(resul);
                 if(!resul[0]){
                     res.status(400).json({message: "utilisateur non supprimé"});
                 }
