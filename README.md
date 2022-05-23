@@ -7,7 +7,7 @@ npm install
 ### Installer la BDD
 Copié et collé le ficher db.sql dans votre SGBD mysql. Vous y trouverez également l'email administrateur.
 
-### Configurer un .env
+### Configurer un .env dans le dossier config
 ```
 PORT = 5000
 MP_ADMIN = groupomania2020!
