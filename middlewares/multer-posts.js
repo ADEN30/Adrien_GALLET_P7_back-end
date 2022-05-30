@@ -1,5 +1,7 @@
 const multer = require("multer");
 
+
+/* Création d'une bibliothèque */
 const MIME_TYPE = {
     "image/gif": "gif",
     "image/jpg": "jpg",
@@ -9,9 +11,13 @@ const MIME_TYPE = {
 
 
 const storage = multer.diskStorage({
+
+    /* Destination ou sera stocké l'image le dodsier de stockage */
     destination: (req, file, cb) =>{
         cb(null, "images/posts");
     },
+
+    /* Nommage de fichier qui sera stocké  */
     filename: (req, file, cb) =>{
         const name = file.originalname.split(" ").join("_");
         const extension = MIME_TYPE[file.mimetype];
