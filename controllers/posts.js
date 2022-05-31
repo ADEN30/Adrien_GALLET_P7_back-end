@@ -17,7 +17,7 @@ exports.getAllposts = (req, res, next) => {
                 for (let y = 0; y < posts_comments.length; y++) {
                     if (all_posts_comment[i].id_post == posts_comments[y].postId_user_post_comment) {
                         let user_comment = {
-                            id_comment: posts_comments[y].id_user_post_comment,
+                            id_comment: posts_comments[y].userId_user_post_comment,
                             comment: posts_comments[y].texte_user_post_comment,
                             name: posts_comments[y].name_user,
                             firstname: posts_comments[y].firstname_user,
@@ -355,7 +355,7 @@ exports.create_comment = (req, res) => {
                         /* On met à jour comment_post à true ce qui permet de dire que ce post contient au moins 1 commentaire */
                         con.query(`UPDATE posts SET comment_post = true WHERE id_post = ${req.body.post}`, (err, result, field) => {
                             if (err) throw err;
-                            res.status(201).json({ name: user[0].name_user, firstname: user[0].firstname_user, picture: user[0].picture_user, id_comment: commentaires[0].id_user_post_comment });
+                            res.status(201).json({ name: user[0].name_user, firstname: user[0].firstname_user, picture: user[0].picture_user, id_comment: commentaires[0].userId_user_post_comment });
                         });
                     }
                     else if (resu[0].comment_post == true) {
