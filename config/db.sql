@@ -66,4 +66,4 @@ CREATE TABLE salons_messages (
     FOREIGN KEY (id_salon_salon_message) REFERENCES users_salons(id_user_salon) ON DELETE CASCADE
 );
 
-INSERT INTO users (`email_user`, `password_user`, `name_user`, `firstname_user`, `picture_user`, `droit_user`) VALUES ("admin.ctrl@groupomania.fr", "$2b$10$BbJV4L.wGG8E0zTyfBoVpemZBPc1uR/voT1ZJPWO2TzQQoHQPuPbS", "ADMIN", "contrôle", "www/image/admin", 1);
+INSERT INTO users (`email_user`, `password_user`, `name_user`, `firstname_user`, `picture_user`, `droit_user`) VALUES ("admin.ctrl@groupomania.fr", "$2b$10$Be.lBOOeplGp5O6KsypJZu3JfaJ0YtJd4dSNeAVaPWs2Ht9IXV4Y6", "ADMIN", "contrôle", "www/image/admin", 1);

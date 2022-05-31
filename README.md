@@ -10,7 +10,7 @@ Copié et collé le ficher db.sql dans votre SGBD mysql. Vous y trouverez égale
 ### Configurer un .env dans le dossier config
 ```
 PORT = 5000
-MP_ADMIN = groupomania2020!
+MP_ADMIN = Hell0_friend!
 DB_MP = le mot de passe de votre base de donnee
 ```
 ### Les dossiers
