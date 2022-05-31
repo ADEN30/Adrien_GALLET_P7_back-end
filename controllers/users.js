@@ -38,12 +38,13 @@ exports.login = (req, res, next) => {
 
     /* Récupération de l'utilisateur avec l'email envoyé par le client */
     con.query(`SELECT * FROM users WHERE email_user = "${req.body.email}"`, (err, result, fields) => {
+        
         if (err) {
             throw err;
         }
         if (result.length > 0) {
             if (req.body.email && result[0].email_user) {
-
+                
                 /* Vérifification du mot de passe */
                 bcrypt.compare(req.body.password, result[0].password_user)
                     .then(rep => {
@@ -53,17 +54,16 @@ exports.login = (req, res, next) => {
 
                             /* Création d'un xsrf-token à l'aide de crypto */
                             const xsrfToken = crypto.randomBytes(64).toString('hex');
-
                             /* Création d'un jsw token pour l'utilisateur */
                             let token = jwt.sign({ userId: result[0].id_user, xsrfToken }, "RANDOM_SECRET_TOKEN", { expiresIn: "24h" });
                             res.status(200)
 
                                 /* Cration d'un cookie portant le token */
                                 .cookie("token", JSON.stringify(token), {
-                                    httpOnly: true, /* Permet d'être utilisé uniquement pour des requête http */
-                                    expires: new Date(Date.now() + 60 * 60 * 1000) /* Définis le durée de vie du cookie */
+                                    httpOnly: true, 
+                                    expires: new Date(Date.now() + 60 * 60 * 1000) 
                                 })
-                            json({
+                            .json({
                                 message: "Connecté",
                                 userId: result[0].id_user,
                                 droit: result[0].droit_user,

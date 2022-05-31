@@ -18,8 +18,8 @@ module.exports = (req, res, next) => {
         if (!xsrfToken && xsrfToken != decoded.xsrfToken) {
 
         }
-        /* Si il y a un userId dans le crops de la requête, il doit être égale au userId présent de le jsw token */
-        if (req.body.userId && req.body.userId != userId) {
+        /* Si il y a un userId dans le corps de la requête, il doit être égale au userId présent de le jsw token */
+        else if (req.body.userId && req.body.userId != userId) {
             res.status(400).json({ message: 'Non authentifié' });
             throw "User ID non valide";
 
